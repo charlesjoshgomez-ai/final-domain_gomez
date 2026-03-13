@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Era University Library Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <h1>📚 New Era University Library Tracker</h1>
+        <nav>
+            <button id="loginBtn">Login</button>
+            <button id="logoutBtn" style="display:none;">Logout</button>
+            <span id="userDisplay"></span>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="search-section">
+            <h2>Search Books</h2>
+            <input type="text" id="searchInput" placeholder="Search by title, author, or ISBN...">
+            <button id="searchBtn">Search</button>
+        </section>
+
+        <section class="books-section">
+            <h2>Available Books</h2>
+            <div id="booksList" class="books-grid">
+                <p>Loading books...</p>
+            </div>
+        </section>
+
+        <section class="borrowed-section" id="borrowedSection" style="display:none;">
+            <h2>My Borrowed Books</h2>
+            <div id="borrowedList" class="books-grid">
+                <p>No borrowed books yet.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 New Era University. All rights reserved.</p>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
