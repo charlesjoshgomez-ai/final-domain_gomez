@@ -1,9 +1,20 @@
-import { doc, updateDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useEffect, useState } from 'react';
-import { View, Text, FlatList } from 'react-native';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
-import { app } from './firebaseConfig'; // your Firebase config file
+import { View, Text, FlatList, Button } from 'react-native';
+import { 
+  getFirestore, 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  doc, 
+  updateDoc, 
+  addDoc, 
+  serverTimestamp 
+} from 'firebase/firestore';
+import { app } from './firebaseConfig';
+
 const db = getFirestore(app);
+
 export default function BooksScreen() {
   const [books, setBooks] = useState([]);
 
@@ -25,6 +36,32 @@ export default function BooksScreen() {
     fetchBooks();
   }, []);
 
+  const borrowBook = async (bookId, userId) => {
+    try {
+      const now = new Date();
+      const dueDate = new Date(now);
+      dueDate.setDate(now.getDate() + 7);
+
+      const bookRef = doc(db, "books", bookId);
+      await updateDoc(bookRef, {
+        available: false,
+        borrowedBy: userId,
+        dueDate: dueDate
+      });
+
+      await addDoc(collection(db, "transactions"), {
+        bookId: bookId,
+        userId: userId,
+        borrowDate: serverTimestamp(),
+        returnDate: null
+      });
+
+      console.log("Book borrowed successfully!");
+    } catch (error) {
+      console.error("Error borrowing book:", error);
+    }
+  };
+
   return (
     <View>
       <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Available Books</Text>
@@ -34,47 +71,13 @@ export default function BooksScreen() {
         renderItem={({ item }) => (
           <View style={{ marginVertical: 10 }}>
             <Text>{item.title} by {item.author}</Text>
+            <Button 
+              title="Borrow" 
+              onPress={() => borrowBook(item.id, "oQahlXZAwcLNx4GtU5Gm")} 
+            />
           </View>
         )}
       />
     </View>
   );
-const borrowBook = async (bookId, userId) => {
-  try {
-    // Calculate due date = now + 7 days
-    const now = new Date();
-    const dueDate = new Date(now);
-    dueDate.setDate(now.getDate() + 7);
-
-    // Update the book document
-    const bookRef = doc(db, "books", bookId);
-    await updateDoc(bookRef, {
-      available: false,
-      borrowedBy: userId,
-      dueDate: dueDate
-    });
-
-    // Create a transaction record
-    await addDoc(collection(db, "transactions"), {
-      bookId: bookId,
-      userId: userId,
-      borrowDate: serverTimestamp(),
-      returnDate: null
-    });
-
-    console.log("Book borrowed successfully!");
-  } catch (error) {
-    console.error("Error borrowing book:", error);
-  }
-};
-renderItem={({ item }) => (
-  <View style={{ marginVertical: 10 }}>
-    <Text>{item.title} by {item.author}</Text>
-    <Button 
-      title="Borrow" 
-      onPress={() => borrowBook(item.id, "oQahlXZAwcLNx4GtU5Gm")} 
-    />
-  </View>
-)}
-
 }
