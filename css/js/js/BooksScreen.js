@@ -1,3 +1,4 @@
+import { doc, updateDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useEffect, useState } from 'react';
 import { View, Text, FlatList } from 'react-native';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
@@ -38,4 +39,42 @@ export default function BooksScreen() {
       />
     </View>
   );
+const borrowBook = async (bookId, userId) => {
+  try {
+    // Calculate due date = now + 7 days
+    const now = new Date();
+    const dueDate = new Date(now);
+    dueDate.setDate(now.getDate() + 7);
+
+    // Update the book document
+    const bookRef = doc(db, "books", bookId);
+    await updateDoc(bookRef, {
+      available: false,
+      borrowedBy: userId,
+      dueDate: dueDate
+    });
+
+    // Create a transaction record
+    await addDoc(collection(db, "transactions"), {
+      bookId: bookId,
+      userId: userId,
+      borrowDate: serverTimestamp(),
+      returnDate: null
+    });
+
+    console.log("Book borrowed successfully!");
+  } catch (error) {
+    console.error("Error borrowing book:", error);
+  }
+};
+renderItem={({ item }) => (
+  <View style={{ marginVertical: 10 }}>
+    <Text>{item.title} by {item.author}</Text>
+    <Button 
+      title="Borrow" 
+      onPress={() => borrowBook(item.id, "ZFviPYs9jHddtHhZUW5R1pep8UO2")} 
+    />
+  </View>
+)}
+
 }
